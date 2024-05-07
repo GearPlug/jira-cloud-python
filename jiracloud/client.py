@@ -1,3 +1,4 @@
+import json
 import requests
 
 from jiracloud.exceptions import UnknownError, InvalidIDError, NotFoundIDError, NotAuthenticatedError, PermissionError
@@ -77,6 +78,30 @@ class Client(object):
 
         self._BASE_URL = '{}/{}/{}'.format(self.BASE_URL, cloud_id, self.API_URL)
 
+    def set_name_app(self, name_app):
+        self._BASE_URL = 'https://{0}.atlassian.net/rest/api/3/'.format(name_app)
+
+    def create_issue(self, data):
+        return self._post(endpoint=self._BASE_URL + 'issue', data=json.dumps(data),
+                          headers={'Content-Type': 'application/json'})
+
+    def get_all_issues(self, params):
+        return self._get(endpoint=self._BASE_URL + 'search', params=params)
+
+    def create_webhook(self, payload: {}) -> bool:
+        response = self._post(endpoint=self._BASE_URL + "webhook", data=payload,
+                              headers={'Content-Type': 'application/json'})
+        return response
+
+    def delete_webhook(self, webhook_id: str) -> bool:
+        payload = {
+            "webhookIds": [
+                webhook_id
+            ]
+        }
+        response = self._delete(endpoint=self._BASE_URL + "webhook", data=payload)
+        return response
+
     def _get(self, endpoint, **kwargs):
         return self._request('GET', endpoint, **kwargs)
 
@@ -101,7 +126,7 @@ class Client(object):
             r = response.json()
         else:
             return response.text
-        
+
         if not response.ok:
             message = None
             if 'message' in r:
@@ -110,7 +135,7 @@ class Client(object):
                 message = '. '.join(r['errorMessages'])
             if 'error_description' in r:
                 message = r['error_description']
-            
+
             if status_code == 400:
                 raise InvalidIDError(message, response)
             if status_code == 401:
@@ -119,7 +144,7 @@ class Client(object):
                 raise PermissionError(message, response)
             if status_code == 404:
                 raise NotFoundIDError(message, response)
-                
+
             raise UnknownError(message, response)
 
         return r
