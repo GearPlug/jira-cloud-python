@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "jira-cloud-python"
-version = "1.0.1"
+version = "1.0.2"
 description = "API wrapper for Jira Cloud written in Python"
-authors = ["Miguel Ferrer <ingferrermiguel@gmail.com>"]
+authors = ["Gearplug Apps Team <apps@gearplug.io>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "jiracloud"}]
