@@ -1,3 +1,4 @@
+import json
 import requests
 
 from jiracloud.exceptions import UnknownError, InvalidIDError, NotFoundIDError, NotAuthenticatedError, PermissionError
@@ -76,6 +77,30 @@ class Client(object):
         self.cloud_id = cloud_id
 
         self._BASE_URL = '{}/{}/{}'.format(self.BASE_URL, cloud_id, self.API_URL)
+
+    def set_name_app(self, name_app):
+        self._BASE_URL = 'https://{0}.atlassian.net/rest/api/3/'.format(name_app)
+
+    def create_issue(self, data):
+        return self._post(endpoint=self._BASE_URL + 'issue', data=json.dumps(data),
+                          headers={'Content-Type': 'application/json'})
+
+    def get_all_issues(self, params):
+        return self._get(endpoint=self._BASE_URL + 'search', params=params)
+
+    def create_webhook(self, payload: {}) -> bool:
+        response = self._post(endpoint=self._BASE_URL + "webhook", data=payload,
+                              headers={'Content-Type': 'application/json'})
+        return response
+
+    def delete_webhook(self, webhook_id: str) -> bool:
+        payload = {
+            "webhookIds": [
+                webhook_id
+            ]
+        }
+        response = self._delete(endpoint=self._BASE_URL + "webhook", data=payload)
+        return response
 
     def _get(self, endpoint, **kwargs):
         return self._request('GET', endpoint, **kwargs)
