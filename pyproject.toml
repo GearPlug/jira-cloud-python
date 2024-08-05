@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jira-cloud-python"
-version = "1.0.2"
+version = "1.0.3"
 description = "API wrapper for Jira Cloud written in Python"
 authors = ["Gearplug Apps Team <apps@gearplug.io>"]
 license = "MIT"
