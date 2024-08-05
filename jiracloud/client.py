@@ -88,19 +88,26 @@ class Client(object):
     def get_all_issues(self, params):
         return self._get(endpoint=self._BASE_URL + 'search', params=params)
 
+    def get_all_webhook(self):
+        return self._get(endpoint=self._BASE_URL + 'webhook')
+
     def create_webhook(self, payload: {}) -> bool:
         response = self._post(endpoint=self._BASE_URL + "webhook", data=payload,
                               headers={'Content-Type': 'application/json'})
         return response
 
-    def delete_webhook(self, webhook_id: str) -> bool:
+    def delete_webhook(self, webhook_list: []):
         payload = {
-            "webhookIds": [
-                webhook_id
-            ]
+            "webhookIds": webhook_list
         }
-        response = self._delete(endpoint=self._BASE_URL + "webhook", data=payload)
-        return response
+
+        headers = {
+            "Authorization": f"Bearer {self._access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+
+        return requests.delete(self._BASE_URL + "webhook", headers=headers, data=json.dumps(payload))
 
     def _get(self, endpoint, **kwargs):
         return self._request('GET', endpoint, **kwargs)
@@ -126,7 +133,7 @@ class Client(object):
             r = response.json()
         else:
             return response.text
-        
+
         if not response.ok:
             message = None
             if 'message' in r:
@@ -135,7 +142,7 @@ class Client(object):
                 message = '. '.join(r['errorMessages'])
             if 'error_description' in r:
                 message = r['error_description']
-            
+
             if status_code == 400:
                 raise InvalidIDError(message, response)
             if status_code == 401:
@@ -144,7 +151,7 @@ class Client(object):
                 raise PermissionError(message, response)
             if status_code == 404:
                 raise NotFoundIDError(message, response)
-                
+
             raise UnknownError(message, response)
 
         return r
